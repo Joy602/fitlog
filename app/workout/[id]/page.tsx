@@ -87,7 +87,7 @@ export default function WorkoutDetailPage({
           <span>Back to workouts</span>
         </Link>
 
-        {/* 4. Two-Column Layout (Figma Design Match) */}
+        {/* Requirement 4: Two-Column Layout (Figma Design Match) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start bg-[#12141a] p-6 md:p-8 rounded-3xl border border-gray-800/80">
           {/* Left Column — Visual/Media */}
           <div className="relative w-full h-[350px] md:h-[480px] rounded-2xl overflow-hidden bg-gray-900 border border-gray-800">
