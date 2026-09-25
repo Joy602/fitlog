@@ -20,6 +20,7 @@ export default function HomePage() {
   const [sortBy, setSortBy] = useState<"duration" | "calories" | "rating">(
     "duration",
   );
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -38,8 +39,20 @@ export default function HomePage() {
     fetchWorkouts();
   }, []);
 
-  // Challenge C1: Sort Functionality
-  const sortedWorkouts = [...workouts].sort((a, b) => {
+  // Dynamically Extract Categories (Challenge C2)
+  const categories = [
+    "All",
+    ...Array.from(new Set(workouts.flatMap((w) => w.category || []))),
+  ];
+
+  // Filter Workouts by Selected Category
+  const filteredWorkouts =
+    selectedCategory === "All"
+      ? workouts
+      : workouts.filter((w) => w.category?.includes(selectedCategory));
+
+  // Sort Functionality (Challenge C1)
+  const sortedWorkouts = [...filteredWorkouts].sort((a, b) => {
     if (sortBy === "duration") return b.duration - a.duration;
     if (sortBy === "calories") return b.calories - a.calories;
     if (sortBy === "rating") return b.rating - a.rating;
@@ -49,7 +62,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen pb-16">
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
-        {/* Requirement 2: Hero / Banner Section */}
+        {/* Banner Section */}
         <section className="bg-[#12141a] rounded-3xl p-6 md:p-12 border border-gray-800/80 mb-16 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
           <div className="max-w-xl z-10">
             <p className="text-[#ccff00] text-xs md:text-sm font-semibold uppercase tracking-widest mb-3">
@@ -71,7 +84,6 @@ export default function HomePage() {
             </a>
           </div>
 
-          {/* Banner Image Right */}
           <div className="relative w-full md:w-[420px] h-[280px] md:h-[340px] flex justify-center items-center">
             <div className="relative w-full h-full rounded-2xl overflow-hidden">
               <Image
@@ -85,7 +97,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Requirement 3: The Library Section */}
+        {/* Library Section */}
         <section id="library" className="scroll-mt-24">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
             <div>
@@ -97,7 +109,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Challenge C1: Sort Dropdown */}
+            {/* Sort Dropdown */}
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-400 uppercase tracking-wider font-medium">
                 Sort By
@@ -121,14 +133,37 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* C2: Category Filter Buttons */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-4 py-2 rounded-full text-xs font-bold uppercase transition-all whitespace-nowrap ${
+                  selectedCategory === category
+                    ? "bg-[#ccff00] text-black shadow-md scale-105"
+                    : "bg-[#12141a] text-gray-400 hover:text-white border border-gray-800"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
           {/* Loading State */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 text-gray-400">
               <Loader2 className="w-10 h-10 animate-spin text-[#ccff00] mb-4" />
               <p className="text-sm">Loading workouts library...</p>
             </div>
+          ) : sortedWorkouts.length === 0 ? (
+            <div className="text-center py-16 bg-[#12141a] rounded-2xl border border-gray-800">
+              <p className="text-gray-400">
+                No workouts found for category &quot;{selectedCategory}&quot;.
+              </p>
+            </div>
           ) : (
-            /* Workout Grid (3x4 on large screens) */
+            /* Workout Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {sortedWorkouts.map((workout) => {
                 const id = workout._id || workout.id;
@@ -139,7 +174,7 @@ export default function HomePage() {
                     className="group bg-[#12141a] rounded-2xl border border-gray-800/80 overflow-hidden hover:border-gray-700 transition-all hover:-translate-y-1 duration-300 flex flex-col justify-between"
                   >
                     <div>
-                      {/* Card Image */}
+                      {/* Image */}
                       <div className="relative h-48 w-full bg-gray-900 overflow-hidden">
                         <Image
                           src={
@@ -150,7 +185,6 @@ export default function HomePage() {
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        {/* Category Tags */}
                         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 z-10">
                           {workout.category?.map((cat, idx) => (
                             <span
