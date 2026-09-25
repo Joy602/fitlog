@@ -11,6 +11,8 @@ import {
   Star,
   ChevronDown,
   Loader2,
+  Search,
+  X,
 } from "lucide-react";
 import { Workout } from "@/context/FitLogContext";
 
@@ -21,6 +23,7 @@ export default function HomePage() {
     "duration",
   );
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     const fetchWorkouts = async () => {
@@ -39,17 +42,21 @@ export default function HomePage() {
     fetchWorkouts();
   }, []);
 
-  // Dynamically Extract Categories (Challenge C2)
+  // Dynamic Categories (Challenge C2)
   const categories = [
     "All",
     ...Array.from(new Set(workouts.flatMap((w) => w.category || []))),
   ];
 
-  // Filter Workouts by Selected Category
-  const filteredWorkouts =
-    selectedCategory === "All"
-      ? workouts
-      : workouts.filter((w) => w.category?.includes(selectedCategory));
+  // Filter by Category & Search Query (Challenge C2 & C3)
+  const filteredWorkouts = workouts.filter((w) => {
+    const matchesCategory =
+      selectedCategory === "All" || w.category?.includes(selectedCategory);
+    const matchesSearch =
+      w.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      w.equipment.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   // Sort Functionality (Challenge C1)
   const sortedWorkouts = [...filteredWorkouts].sort((a, b) => {
@@ -99,7 +106,7 @@ export default function HomePage() {
 
         {/* Library Section */}
         <section id="library" className="scroll-mt-24">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-8 gap-4">
             <div>
               <h2 className="font-oswald text-3xl md:text-4xl font-bold uppercase text-white tracking-wide">
                 THE LIBRARY
@@ -109,26 +116,49 @@ export default function HomePage() {
               </p>
             </div>
 
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-400 uppercase tracking-wider font-medium">
-                Sort By
-              </span>
+            {/* Controls: Search and Sort */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              {/* C3: Search Input */}
               <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) =>
-                    setSortBy(
-                      e.target.value as "duration" | "calories" | "rating",
-                    )
-                  }
-                  className="bg-[#12141a] border border-gray-800 text-white text-sm rounded-lg px-4 py-2 pr-8 appearance-none cursor-pointer focus:outline-none focus:border-[#ccff00]"
-                >
-                  <option value="duration">Duration</option>
-                  <option value="calories">Calories</option>
-                  <option value="rating">Rating</option>
-                </select>
-                <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search exercise..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-[#12141a] border border-gray-800 text-white text-sm rounded-lg pl-9 pr-8 py-2 w-full sm:w-56 focus:outline-none focus:border-[#ccff00] transition-colors"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Sort Dropdown */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400 uppercase tracking-wider font-medium hidden sm:inline">
+                  Sort By
+                </span>
+                <div className="relative w-full sm:w-auto">
+                  <select
+                    value={sortBy}
+                    onChange={(e) =>
+                      setSortBy(
+                        e.target.value as "duration" | "calories" | "rating",
+                      )
+                    }
+                    className="bg-[#12141a] border border-gray-800 text-white text-sm rounded-lg px-4 py-2 pr-8 w-full appearance-none cursor-pointer focus:outline-none focus:border-[#ccff00]"
+                  >
+                    <option value="duration">Duration</option>
+                    <option value="calories">Calories</option>
+                    <option value="rating">Rating</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-gray-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               </div>
             </div>
           </div>
@@ -159,7 +189,7 @@ export default function HomePage() {
           ) : sortedWorkouts.length === 0 ? (
             <div className="text-center py-16 bg-[#12141a] rounded-2xl border border-gray-800">
               <p className="text-gray-400">
-                No workouts found for category &quot;{selectedCategory}&quot;.
+                No workouts match your filter criteria.
               </p>
             </div>
           ) : (
