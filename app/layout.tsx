@@ -28,7 +28,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${oswald.variable}`}>
-      <body className="bg-[#0b0c10] text-gray-100 font-sans antialiased min-h-screen flex flex-col justify-between">
+      <body
+        className={`bg-[#0b0c10] text-gray-100 font-sans antialiased min-h-screen flex flex-col justify-between ${inter.variable} ${oswald.variable}`}
+        suppressHydrationWarning
+      >
         <FitLogProvider>
           <Navbar />
           <main className="flex-1">{children}</main>
